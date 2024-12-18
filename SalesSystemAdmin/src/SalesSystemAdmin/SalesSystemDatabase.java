@@ -7,12 +7,12 @@ import java.util.Scanner;
 public class SalesSystemDatabase {
 
     // JDBC URL, user name, and password of Oracle database
-    private static final String DB_URL = "jdbc:oracle:thin:@//db18.cse.cuhk.edu.hk:1521/oradb.cse.cuhk.edu.hk";
-    private static final String DB_USER = "h002";
-    private static final String DB_PASSWORD = "tutjoibA";
+    protected static final String DB_URL = "jdbc:oracle:thin:@//db18.cse.cuhk.edu.hk:1521/oradb.cse.cuhk.edu.hk";
+    protected static final String DB_USER = "h002";
+    protected static final String DB_PASSWORD = "tutjoibA";
 
     // JDBC Connection
-    private Connection connection;
+    protected Connection connection;
 
     // Constructor to connect to the database
     public SalesSystemDatabase() {
@@ -201,7 +201,8 @@ public class SalesSystemDatabase {
     // Main interactive menu
     public void runMenu() {
         Scanner scanner = new Scanner(System.in);
-
+        Manager manager = new Manager();
+        
         while (true) {
             System.out.println("Welcome to sales system!");
             System.out.println("-----Main menu-----");
@@ -217,7 +218,12 @@ public class SalesSystemDatabase {
             if (mainChoice == 1) {
                 administratorMenu(scanner);
             } else if (mainChoice == 2) {
-                System.out.println("Exiting...");
+            	System.out.println("Exiting...");
+                break;
+            } else if (mainChoice == 3) {
+            	manager.manager(scanner);
+            } else if (mainChoice == 4) {
+            	System.out.println("Exiting...");
                 break;
             } else {
                 System.out.println("Invalid choice. Please try again.");
