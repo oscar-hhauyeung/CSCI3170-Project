@@ -36,6 +36,7 @@ public class Saleperson extends SalesSystemDatabase {
         }
     }
 
+    //Enter part searching
     public void searchPart() {
         while (true) {
             System.out.println("Choose the Search criterion:");
@@ -47,11 +48,9 @@ public class Saleperson extends SalesSystemDatabase {
 
             switch (menuChoice) {
                 case 1:
-                    System.out.println("Enter Part Name");
                     processSearching(1);
                     return;
                 case 2:
-                    System.out.println("Enter Manufacturer Name");
                     processSearching(2);
                     return;
                 default:
@@ -60,13 +59,12 @@ public class Saleperson extends SalesSystemDatabase {
         }
     }
 
-    // Only 2 criteria: part, manufacturer
+    // store the searching criteria: part or manufacturer + keyword + order
     public void processSearching(int criteria) {
         while (true) {
             System.out.println("Type in the Search keyword: ");
             if (scanner.hasNext()) {
                 String keyword = scanner.nextLine();
-            	System.out.println("keyword" + keyword);
                 System.out.println("Choose ordering: ");
                 System.out.println("1. By price, ascending order");
                 System.out.println("2. By price, descending order");
@@ -89,8 +87,8 @@ public class Saleperson extends SalesSystemDatabase {
         }
     }
 
+    //perform searching based on the requirement
     public void partSearching(int criteria, String keyword, Integer order) {
-        System.out.println("criteria: " + criteria);
         String query = "";
 
         if (criteria == 1) {
@@ -114,23 +112,27 @@ public class Saleperson extends SalesSystemDatabase {
         }
 
         try (PreparedStatement pstat = connection.prepareStatement(query)) {
+        	//perform partial matching
             pstat.setString(1, "%" + keyword + "%");
             ResultSet rs = pstat.executeQuery();
 
             ResultSetMetaData metaData = rs.getMetaData();
+            
             int columnCnt = metaData.getColumnCount();
-                System.out.println(" | ID | Name | Manufacturer | Category | Quantity | Warranty | Price |");
-                while (rs.next()) {
-    				for (int i = 1; i <= columnCnt; i++) {
-    					System.out.print(" | " + rs.getString(i));
-    				}
-    				System.out.println(" |");
-    			}
+            System.out.println(" | ID | Name | Manufacturer | Category | Quantity | Warranty | Price |");
+            
+            while (rs.next()) {
+            	for (int i = 1; i <= columnCnt; i++) {
+            		System.out.print(" | " + rs.getString(i));
+            	}     	
+            	System.out.println(" |");
+            }
         } catch (SQLException e) {
             System.err.println("Error searching parts: " + e.getMessage());
         }
     }
-
+    
+    //perform sell part
     public void sellPart() {
         System.out.println("Enter The Part ID:");
         int partID = scanner.nextInt();
@@ -145,12 +147,21 @@ public class Saleperson extends SalesSystemDatabase {
                 String partName = rs.getString("pName");
 
                 if (availableQuantity > 0) {
+                	//update the available quantity
                     stat.executeUpdate("UPDATE part SET pAvailableQuantity = pAvailableQuantity - 1 WHERE pID =" + partID);
+                    
+                    //manually generate the tID
+                    ResultSet maxTIDResultSet = stat.executeQuery("SELECT MAX(tID) FROM transaction");
+                    int nextTID = 1; 
+                    if (maxTIDResultSet.next()) {
+                        nextTID = maxTIDResultSet.getInt(1) + 1; 
+                    }
 
-                    String query = "INSERT INTO transaction (pID, sID, tDate) values (?, ?, SYSDATE)";
+                    String query = "INSERT INTO transaction (tID, pID, sID, tDate) values (?, ?, ?, SYSDATE)";
                     try (PreparedStatement pstat = connection.prepareStatement(query)) {
-                        pstat.setInt(1, partID);
-                        pstat.setInt(2, salespersonID);
+                    	pstat.setInt(1, nextTID);
+                        pstat.setInt(2, partID);
+                        pstat.setInt(3, salespersonID);
                         pstat.executeUpdate();
                         System.out.println("Product: " + partName + "(id: " + partID + ") Remaining Quantity: " + (availableQuantity - 1));
                     }
