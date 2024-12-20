@@ -202,6 +202,7 @@ public class SalesSystemDatabase {
     public void runMenu() {
         Scanner scanner = new Scanner(System.in);
         Manager manager = new Manager();
+        Saleperson saleperson = new Saleperson();
         
         while (true) {
             System.out.println("Welcome to sales system!");
@@ -218,8 +219,7 @@ public class SalesSystemDatabase {
             if (mainChoice == 1) {
                 administratorMenu(scanner);
             } else if (mainChoice == 2) {
-            	System.out.println("Exiting...");
-                break;
+            	saleperson.listMenu();
             } else if (mainChoice == 3) {
             	manager.manager(scanner);
             } else if (mainChoice == 4) {
